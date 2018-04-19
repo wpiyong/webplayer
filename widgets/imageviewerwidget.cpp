@@ -8,10 +8,19 @@ ImageViewerWidget::ImageViewerWidget()
    : imageLabel(new QLabel)
 {
     imageLabel->setBackgroundRole(QPalette::Base);
-    imageLabel->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
+    //imageLabel->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
     imageLabel->setScaledContents(true);
     imageLabel->setText("DSR");
-    resize(QGuiApplication::primaryScreen()->availableSize() * 3 / 8);
+
+//    imageLabel->setWindowFlags(Qt::Window);
+//    imageLabel->setScaledContents(true);
+//    imageLabel->showFullScreen();
+    //resize(QGuiApplication::primaryScreen()->availableSize());
+    int width = 780 * 1.5;
+    int height = 520 * 1.5;
+    resize(780, 520);
+
+    //setCentralWidget(imageLabel);
 }
 
 void ImageViewerWidget::SetImage(const QPixmap &newImage)

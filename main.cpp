@@ -1,5 +1,7 @@
 #include "mainwindow.h"
 #include <QApplication>
+#include <QDesktopWidget>
+#include <QStyle>
 #include "./widgets/imageviewerwidget.h"
 #include "controllers/dsrplayercontroller.h"
 
@@ -11,6 +13,10 @@ int main(int argc, char *argv[])
 
     Dsr::ImageViewerWidget imageViewer;
     Dsr::DsrPlayerController playerCtl(&imageViewer);
+    imageViewer.setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
+
+    //imageViewer.setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter, imageViewer.size(), QApplication::desktop()->availableGeometry()));
+
     imageViewer.show();
     return a.exec();
 }
