@@ -115,15 +115,15 @@ void DsrPlayerController::UpdateImageViewer(){
             ::emprintf("UpdateImageViewer with revosReady == true, QByteArray size: %d", pair.second.size());
             emit UpdatePixmapFromImage(pair.second);
             imgIndex++;
+        }
 
-            //check if all images in one revolution have displayed
-            if(imgIndex >= revosVec.at(revoIndex)) {
-                imgIndex = 0;
-                revoIndex++;
-                // check if all revolutions have displayed
-                if(revoIndex >= revosVec.size()) {
-                    revoIndex = 0;
-                }
+        //check if all images in one revolution have displayed
+        if(imgIndex >= revosVec.at(revoIndex)) {
+            imgIndex = 0;
+            revoIndex++;
+            // check if all revolutions have displayed
+            if(revoIndex >= revosVec.size()) {
+                revoIndex = 0;
             }
         }
 
