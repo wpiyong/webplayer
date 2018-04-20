@@ -64,6 +64,8 @@ int DsrPlayerController::calculateImgTotalIndex(int aImgIndex, int aRevoIndex) {
 
 void DsrPlayerController::UpdateImageViewer(){
     if(revosReady) {
+
+        // check new revolution
         if(imgIndex == 0 && newRevolutionSets > 0) {
             ::emprintf("UpdateImageViewer prepareNewRevolutionSets");
             prepareNewRevolutionSets();
