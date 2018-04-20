@@ -92,6 +92,7 @@ void DsrPlayerController::UpdateImageViewer(){
 
             if(imgSize[imgTotalIndex] > 0) {
                 emit UpdatePixmapFromImage(ba);
+                imgIndex++;
             }
 //            QByteArray ba = pair.first.toLatin1();
 //            const char *str = ba.data();
