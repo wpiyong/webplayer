@@ -72,6 +72,119 @@ EMSCRIPTEN_KEEPALIVE void setImgTotal(int count) {
     imgTotal = count;
 }
 
+// get new revolutions 6 functions
+
+EMSCRIPTEN_KEEPALIVE void createListNew(int revolutions) {
+    listNew = (int*)malloc(sizeof(int)*revolutions);
+    listSizeNew = revolutions;
+}
+
+EMSCRIPTEN_KEEPALIVE void setListDataNew(int value, int index) {
+    listNew[index] = value;
+}
+
+EMSCRIPTEN_KEEPALIVE void createImgUrlArrayNew(int imgs) {
+    imgUrlsNew      = malloc(imgs * sizeof(char*));
+    imgDataNew      = malloc(imgs * sizeof(char*));
+    imgSizeNew      = malloc(imgs * sizeof(int));
+    imgUrlSizeNew   = malloc(imgs * sizeof(int));
+
+    for(int i = 0; i < imgs; i ++) {
+        imgUrlsNew[i]       = '\0';
+        imgDataNew[i]       = '\0';
+        imgSizeNew[i]       = 0;
+        imgUrlSizeNew[i]    = 0;
+    }
+}
+
+EMSCRIPTEN_KEEPALIVE void setImgUrlNew(char* url, int index, int length) {
+    if(imgUrlsNew) {
+        imgUrlsNew[index] = malloc((length + 1) * sizeof(char));
+        strcpy(imgUrlsNew[index], url);
+        imgUrlSizeNew[index] = length;
+    }
+}
+
+// this function is replace by emscripten fetch function
+EMSCRIPTEN_KEEPALIVE void setImgDataNew(char* data, int index, int length) {
+    if(imgDataNew) {
+        imgDataNew[index] = malloc((length + 1) * sizeof(char));
+        memcpy(imgDataNew[index], data, length);
+        imgDataNew[index][length] = '\0';
+    }
+    if(imgSizeNew) {
+        imgSizeNew[index] = length;
+    }
+}
+
+EMSCRIPTEN_KEEPALIVE void resetNewRevolutionSets(){
+    if(listNew)
+        free(listNew);
+    if(imgSizeNew)
+        free(imgSizeNew);
+    if(imgUrlSizeNew)
+        free(imgUrlSizeNew);
+
+    int i = 0;
+    if(imgUrlsNew) {
+        for(i = 0; i < imgTotalNew; i++) {
+            if(imgUrlsNew[i])
+                free(imgUrlsNew[i]);
+        }
+        free(imgUrlsNew);
+    }
+    imgTotalNew = 0;
+    listSizeNew = 0;
+}
+
+EMSCRIPTEN_KEEPALIVE void prepareNewRevolutionSets(){
+    // clear the flag
+    newRevolutionSets = 0;
+
+    // free old
+    if(list)
+        free(list);
+    if(imgSize)
+        free(imgSize);
+    int i = 0;
+    if(imgUrls) {
+        for(i = 0; i < imgTotal; i++) {
+            if(imgUrls[i])
+                free(imgUrls[i]);
+        }
+        free(imgUrls);
+    }
+    if(imgData) {
+        for(i = 0; i < imgTotal; i++) {
+            if(imgData[i])
+                free(imgData[i]);
+        }
+        free(imgData);
+    }
+    imgTotal = imgTotalNew;
+    listSize = listSizeNew;
+
+    // create new
+    emprintf("prepareNewRevolutionSets listSize: %d.", listSizeNew);
+    createList(listSize);
+    for(i = 0; i < listSize; i++) {
+        emprintf("prepareNewRevolutionSets setListData: %d, %d.", listNew[i], i);
+        setListData(listNew[i], i);
+    }
+
+    emprintf("prepareNewRevolutionSets createImgUrlArray: %d.", imgTotal);
+    createImgUrlArray(imgTotal);
+    for(i = 0; i < imgTotal; i++) {
+        emprintf("prepareNewRevolutionSets setImgUrl: %d, %s.", i, imgUrlsNew[i]);
+        setImgUrl(imgUrlsNew[i], i, imgUrlSizeNew[i]);
+    }
+}
+
+EMSCRIPTEN_KEEPALIVE void setImgTotalNew(int count) {
+    imgTotalNew = count;
+    newRevolutionSets = count;
+}
+
 void downloadSucceeded(emscripten_fetch_t *fetch) {
   emprintf("Finished downloading %llu bytes from URL %s.", fetch->numBytes, fetch->url);
   // The data is now available at fetch->data[0] through fetch->data[fetch->numBytes-1];

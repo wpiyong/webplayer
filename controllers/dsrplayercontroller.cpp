@@ -12,6 +12,7 @@ extern "C" void fetch(char* url, int index);
 extern "C" unsigned char *base64_decode(const char *data, size_t input_length, size_t *output_length);
 extern "C" int getData(int index);
 extern "C" void setData(int value, int index);
+extern "C" void prepareNewRevolutionSets();
 extern "C" int imgTotal;
 extern "C" char** imgUrls;
 extern "C" char** imgData;
@@ -20,6 +21,7 @@ extern "C" int listSize;
 extern "C" int* imgSize;
 extern "C" int imgFinished;
 extern "C" int downloadIndex;
+extern "C" int newRevolutionSets;
 
 using namespace Dsr;
 
@@ -62,7 +64,14 @@ int DsrPlayerController::calculateImgTotalIndex(int aImgIndex, int aRevoIndex) {
 
 void DsrPlayerController::UpdateImageViewer(){
     if(revosReady) {
+        if(imgIndex == 0 && newRevolutionSets > 0) {
+            ::emprintf("UpdateImageViewer prepareNewRevolutionSets");
+            prepareNewRevolutionSets();
+            prepareRevolutionMap();
+        }
+
         imgTotalIndex = calculateImgTotalIndex(imgIndex, revoIndex);
+        ::emprintf("UpdateImageViewer image index: %d", imgTotalIndex);
         QPair<QString, QByteArray> pair = imgsVec.at(imgTotalIndex);
         QByteArray second = pair.second;
         const char *strSecond = second.data();

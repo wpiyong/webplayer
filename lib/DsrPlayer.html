@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Qt for WebAssembly</title>
+    <style>
+      html, body { padding: 0; margin : 0; overflow:hidden; height: 100% }
+      div#status.emscripten { margin : 0; display: block;  float: none }
+      progress#progress.emscripten { margin : 0; display: block; float: none; visibility: hidden }
+      /* the canvas *must not* have any border or padding, or mouse coords will be wrong */
+      canvas.emscripten { border: 0px none; background-color: white; height:100%; width:100%; }
+
+      .spinner {
+        height: 250px;
+        width: 250px;
+        margin: 0px auto;
+        -webkit-animation: rotation .8s linear infinite;
+        -moz-animation: rotation .8s linear infinite;
+        -o-animation: rotation .8s linear infinite;
+        animation: rotation 0.8s linear infinite;
+        border-left: 10px solid rgb(9,16,43);
+        border-right: 10px solid rgb(9,16,43);
+        border-bottom: 10px solid rgb(9,16,43);
+        border-top: 10px solid rgb(65,205,82);
+        border-radius: 100%;
+        background-color: rgb(23,168,26);
+      }
+      @-webkit-keyframes rotation {
+        from {-webkit-transform: rotate(0deg);}
+        to {-webkit-transform: rotate(360deg);}
+      }
+      @-moz-keyframes rotation {
+        from {-moz-transform: rotate(0deg);}
+        to {-moz-transform: rotate(360deg);}
+      }
+      @-o-keyframes rotation {
+        from {-o-transform: rotate(0deg);}
+        to {-o-transform: rotate(360deg);}
+      }
+      @keyframes rotation {
+        from {transform: rotate(0deg);}
+        to {transform: rotate(360deg);}
+      }
+      #status {
+             display: inline-block;
+             vertical-align: top;
+             margin-top: 30px;
+             margin-left: 20px;
+             font-weight: bold;
+             color: rgb(132,136,149);
+           }
+
+      #progress {
+            height: 20px;
+            width: 30px;
+          }
+    </style>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  </head>
+  <body onload="init()">
+    <figure style="overflow:visible;" id="spinner">
+      <div class="spinner"></div>
+      <center style="margin-top:0.5em">
+        <strong>Qt for WebAssembly</strong>
+        <div class="emscripten" id="status">Downloading...</div>
+        <progress class="emscripten" value="0" max="100" id="progress" hidden=1></progress>
+      </center>
+    </figure>
+    <canvas class="emscripten" id="canvas" oncontextmenu="event.preventDefault()"></canvas>
+
+    <script type='text/javascript'>
+        function init() {
+          var spininer = document.getElementById('spinner');
+          var canvas = document.getElementById('canvas');
+
+          var qtLoader = QtLoader({
+              showLoader: function(errorText) {
+                  spininer.style.display = 'block';
+                  canvas.style.display = 'none'
+              },
+              showCanvas: function() {
+                  spininer.style.display = 'none';
+                  canvas.style.display = 'block'
+                  return canvas;
+              },
+          });
+          qtLoader.loadEmscriptenModule(Module);
+
+
+          var emModule = {};
+          console.log("before timeout emModule: ", emModule);
+
+          var self = this;
+
+          self.ajaxToken = function() {
+              var request = {
+                  url: "https://preproduction.control.dsr.systems/oauth2/token/",
+                  type: "POST",
+                  //contentType: "application/json",
+                  accepts: "application/json",
+                  cache: false,
+                  dataType: "json",
+                  crossDomain:true,
+                  data: {
+                    "client_id": "0ea35b3c9ac7142619de1b5c4244a0581ab062a517439a39e4978fd8851dfd59",
+                    "client_secret": "9e343b582e30c693fabcf79dab11573b25e3be7a594e1efab98b512552a92467",
+                    "grant_type": "password",
+                    "username": "yong-dsr",
+                    "password": "P@ssw0rd"
+                  },
+                  error: function(jqXHR) {
+                      console.log("ajax error " + jqXHR.status);
+                  }
+              };
+              return $.ajax(request);
+          }
+
+          self.ajaxRevoSets = function(token) {
+              var request = {
+                    url: "https://preproduction.control.dsr.systems/api/v2/revolution_sets.json",
+                    type: "GET",
+                    //contentType: "application/json",
+                    //accepts: "application/json",
+                    cache: false,
+                    dataType: "json",
+                    crossDomain:true,
+                    //headers: {
+                    //  "Authorization": "Bearer " + data.access_token
+                    //},
+                    beforeSend:function(xhr){
+                      xhr.setRequestHeader("Authorization", "Bearer " + token);
+                    },
+                    error: function(jqXHR) {
+                        console.log("ajax error " + jqXHR.status);
+                    }
+              };
+              return $.ajax(request);
+          }
+
+          var preRevolutionSets;
+          
+          setTimeout(myFunction, 25000);
+
+          setInterval(getNewRevolutions, 1000 * 60 * 10);
+          // function allReady() {
+          //   setTimeout(myFunction, 1000);
+          // }
+
+          function getNewRevolutions(){
+            console.log("getNewRevolutions");
+            self.ajaxToken().done(function(data){
+              console.log(data.access_token);
+
+              self.ajaxRevoSets(data.access_token).done(function(data){
+                console.log(data);
+                var revolution_sets = data.revolution_sets;
+                preRevolutionSets = data.revolution_sets;
+                console.log("new total revolution sets: ", revolution_sets.length);
+
+                // 1. create the list
+                emModule.ccall("createListNew", null, ['number'], [revolution_sets.length]);
+
+                var i;
+                var imgTotal = 0;
+
+                for (i = 0; i < revolution_sets.length; i++) {
+                  console.log("revolution index: ", i);
+                  var revolution = revolution_sets[i].Revolutions;
+                  var urlArray = revolution[0].WebImages;
+                  if(revolution.length > 1) {
+                    urlArray = revolution[1].WebImages;
+                  }
+                  console.log("new images in revolution: ", urlArray.length);
+                  // 2. update the list
+                  emModule.ccall("setListDataNew", null, ['number', 'number'], [urlArray.length, i]);
+
+                  imgTotal += urlArray.length;
+                }
+                console.log("new total image url created: ", imgTotal);
+
+                // 3. create imgUrlArray
+                emModule.ccall("createImgUrlArrayNew", null, ['number'], [imgTotal]);
+
+                // 4. update imgUrlArray
+                var imgIndex = 0;
+                for (i = 0; i < revolution_sets.length; i++) {
+                  console.log("revolution index: ", i);
+                  var revolution = revolution_sets[i].Revolutions;
+                  var urlArray = revolution[0].WebImages;
+                  if(revolution.length > 1) {
+                    urlArray = revolution[1].WebImages;
+                  }
+
+                  var j;
+                  for(j = 0; j < urlArray.length; j++) {
+                    var myStr = urlArray[j];
+                    var length = urlArray[j].length;
+                    console.log("url: ", myStr);
+                    var ptr  = emModule.allocate(emModule.intArrayFromString(myStr), 'i8', 0);
+                    emModule.ccall("setImgUrlNew", null, ['number','number', 'number'], [ptr, imgIndex, length]);
+                    imgIndex++;
+                  }
+                }
+                console.log("new total image url updated: ", imgIndex);
+
+                // 5. set image total
+                emModule.ccall("setImgTotalNew", null, ['number'], [imgIndex]);
+
+              }) // end of ajaxRevoSets
+            }) // end of ajaxToken
+          }
+
+          function myFunction(){
+            console.log(qtLoader);
+            emModule = qtLoader.emModule;
+            console.log("after timeout emModule: ", emModule);
+
+            self.ajaxToken().done(function(data){
+              console.log(data.access_token);
+
+              self.ajaxRevoSets(data.access_token).done(function(data){
+                console.log(data);
+                var revolution_sets = data.revolution_sets;
+                preRevolutionSets = data.revolution_sets;
+                console.log("total revolution sets: ", revolution_sets.length);
+
+                // 0. clean new set
+                emModule.ccall("resetNewRevolutionSets", null, null, null);
+
+                // 1. create the list
+                emModule.ccall("createList", null, ['number'], [revolution_sets.length]);
+
+                var i;
+                var imgTotal = 0;
+
+                for (i = 0; i < revolution_sets.length; i++) {
+                  console.log("revolution index: ", i);
+                  var revolution = revolution_sets[i].Revolutions;
+                  var urlArray = revolution[0].WebImages;
+                  if(revolution.length > 1) {
+                    urlArray = revolution[1].WebImages;
+                  }
+                  console.log("images in revolution: ", urlArray.length);
+                  // 2. update the list
+                  emModule.ccall("setListData", null, ['number', 'number'], [urlArray.length, i]);
+
+                  imgTotal += urlArray.length;
+                }
+                console.log("total image url created: ", imgTotal);
+
+                // 3. create imgUrlArray
+                emModule.ccall("createImgUrlArray", null, ['number'], [imgTotal]);
+
+                // 4. update imgUrlArray
+                var imgIndex = 0;
+                for (i = 0; i < revolution_sets.length; i++) {
+                  console.log("revolution index: ", i);
+                  var revolution = revolution_sets[i].Revolutions;
+                  var urlArray = revolution[0].WebImages;
+                  if(revolution.length > 1) {
+                    urlArray = revolution[1].WebImages;
+                  }
+
+                  var j;
+                  for(j = 0; j < urlArray.length; j++) {
+                    var myStr = urlArray[j];
+                    var length = urlArray[j].length;
+                    console.log("url: ", myStr);
+                    var ptr  = emModule.allocate(emModule.intArrayFromString(myStr), 'i8', 0);
+                    emModule.ccall("setImgUrl", null, ['number','number', 'number'], [ptr, imgIndex, length]);
+                    imgIndex++;
+                  }
+                }
+                console.log("total image url updated: ", imgIndex);
+
+                // 5. set image total
+                emModule.ccall("setImgTotal", null, ['number'], [imgIndex]);
+
+              })
+
+
+            })
+
+          }
+
+      }
+    </script>
+    <script async type="text/javascript" src="qtloader.js"></script>
+    <script async type="text/javascript" src="DsrPlayer.js"></script>
+  </body>
+</html>
