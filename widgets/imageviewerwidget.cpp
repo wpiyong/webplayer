@@ -1,6 +1,7 @@
 #include "imageviewerwidget.h"
 #include <QtWidgets>
 #include <QImage>
+#include "../lib/emprintf.h"
 
 using namespace Dsr;
 
@@ -8,17 +9,18 @@ ImageViewerWidget::ImageViewerWidget()
    : imageLabel(new QLabel)
 {
     imageLabel->setBackgroundRole(QPalette::Base);
-    //imageLabel->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
-    imageLabel->setScaledContents(true);
+    imageLabel->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
+    //imageLabel->setScaledContents(true);
     imageLabel->setText("DSR");
-
+    setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
 //    imageLabel->setWindowFlags(Qt::Window);
-//    imageLabel->setScaledContents(true);
+    imageLabel->setScaledContents(true);
 //    imageLabel->showFullScreen();
     //resize(QGuiApplication::primaryScreen()->availableSize());
-    int width = 780 * 1.5;
-    int height = 520 * 1.5;
-    resize(780, 520);
+    //int width = 780 * 1.5;
+    //int height = 520 * 1.5;
+    //resize(780, 520);
+    resize(1620, 1080);
 
     //setCentralWidget(imageLabel);
 }
@@ -26,8 +28,21 @@ ImageViewerWidget::ImageViewerWidget()
 void ImageViewerWidget::SetImage(const QPixmap &newImage)
 {
 
-    imageLabel->setPixmap(newImage);
+    int w = imageLabel->width();
+    int h = imageLabel->height();
+    ::emprintf("ImageViewerWidget setImage, label width: %d, height: %d: ", w, h);
+    // set a scaled pixmap to a w x h window keeping its aspect ratio
+    imageLabel->setPixmap(newImage.scaled(w, h, Qt::KeepAspectRatio));
+    //imageLabel->setPixmap(newImage);
 
+}
+
+void ImageViewerWidget::resizeEvent(QResizeEvent *event) {
+    int w = imageLabel->width();
+    int h = imageLabel->height();
+
+    // set a scaled pixmap to a w x h window keeping its aspect ratio
+    imageLabel->setPixmap(pixmap.scaled(w, h, Qt::KeepAspectRatio));
 }
 
 void ImageViewerWidget::paintEvent(QPaintEvent *evt){

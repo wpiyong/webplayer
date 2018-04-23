@@ -51,7 +51,7 @@ DsrPlayerController::DsrPlayerController(ImageViewerWidget* aImageViewerWidget, 
 void DsrPlayerController::imageViewerControl(Revolution* rev){
     QTimer *timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(UpdateImageViewer()));
-    timer->start(1000);
+    timer->start(83); // 12 frames per seconds
 }
 
 int DsrPlayerController::calculateImgTotalIndex(int aImgIndex, int aRevoIndex) {
@@ -94,7 +94,11 @@ void DsrPlayerController::UpdateImageViewer(){
 
             if(imgSize[imgTotalIndex] > 0) {
                 emit UpdatePixmapFromImage(ba);
-                imgIndex++;
+                if( revoIndex % 2 == 0 ) {
+                    imgIndex++;
+                } else {
+                    imgIndex--;
+                }
             }
 //            QByteArray ba = pair.first.toLatin1();
 //            const char *str = ba.data();
@@ -116,19 +120,44 @@ void DsrPlayerController::UpdateImageViewer(){
             ::emprintf("UpdateImageViewer with revosReady == true, QByteArray size > 0");
             ::emprintf("UpdateImageViewer with revosReady == true, QByteArray size: %d", pair.second.size());
             emit UpdatePixmapFromImage(pair.second);
-            imgIndex++;
-        }
-
-        //check if all images in one revolution have displayed
-        if(imgIndex >= revosVec.at(revoIndex)) {
-            imgIndex = 0;
-            revoIndex++;
-            // check if all revolutions have displayed
-            if(revoIndex >= revosVec.size()) {
-                revoIndex = 0;
+            if( revoIndex % 2 == 0 ) {
+                imgIndex++;
+            } else {
+                imgIndex--;
             }
         }
 
+        //check if all images in one revolution have displayed
+        if(revoIndex % 2 == 0) {
+            // even revolution index, imgIndex count up
+            if(imgIndex >= revosVec.at(revoIndex)) {
+                //imgIndex = 0;
+                revoIndex++;
+                // check if all revolutions have displayed
+                if(revoIndex >= revosVec.size()) {
+                    revoIndex = 0;
+                }
+                if(revoIndex % 2 == 0) {
+                    imgIndex = 0;
+                } else {
+                    imgIndex = revosVec[revoIndex] -1;
+                }
+            }
+        } else {
+            // odd revolution index, imgIndex count down
+            if(imgIndex < 0) {
+                revoIndex++;
+
+                if(revoIndex >= revosVec.size()) {
+                    revoIndex = 0;
+                }
+                if(revoIndex % 2 == 0) {
+                    imgIndex = 0;
+                } else {
+                    imgIndex = revosVec[revoIndex] -1;
+                }
+            }
+        }
     } else {
         QString img = QString(":/images/side%1.png").arg(QString::number(imgIndex));
         emit UpdatePixmapFromImage(img);

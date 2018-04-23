@@ -158,6 +158,9 @@
                 preRevolutionSets = data.revolution_sets;
                 console.log("new total revolution sets: ", revolution_sets.length);
 
+                // 0. clean new set
+                emModule.ccall("resetNewRevolutionSets", null, null, null);
+
                 // 1. create the list
                 emModule.ccall("createListNew", null, ['number'], [revolution_sets.length]);
 
@@ -224,9 +227,6 @@
                 var revolution_sets = data.revolution_sets;
                 preRevolutionSets = data.revolution_sets;
                 console.log("total revolution sets: ", revolution_sets.length);
-
-                // 0. clean new set
-                emModule.ccall("resetNewRevolutionSets", null, null, null);
 
                 // 1. create the list
                 emModule.ccall("createList", null, ['number'], [revolution_sets.length]);

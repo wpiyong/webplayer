@@ -15,7 +15,7 @@ int main(int argc, char *argv[])
 
     Dsr::ImageViewerWidget imageViewer;
     Dsr::DsrPlayerController playerCtl(&imageViewer);
-    imageViewer.setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
+    //imageViewer.setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
 
     //imageViewer.setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter, imageViewer.size(), QApplication::desktop()->availableGeometry()));
 
