@@ -155,6 +155,8 @@
               self.ajaxRevoSets(data.access_token).done(function(data){
                 console.log(data);
                 var revolution_sets = data.revolution_sets;
+                var new_sets = getNewSets(preRevolutionSets, revolution_sets);
+
                 preRevolutionSets = data.revolution_sets;
                 console.log("new total revolution sets: ", revolution_sets.length);
 
@@ -170,9 +172,9 @@
                 for (i = 0; i < revolution_sets.length; i++) {
                   console.log("revolution index: ", i);
                   var revolution = revolution_sets[i].Revolutions;
-                  var urlArray = revolution[0].WebImages;
+                  var urlArray = revolution[0].RawImages;
                   if(revolution.length > 1) {
-                    urlArray = revolution[1].WebImages;
+                    urlArray = revolution[1].RawImages;
                   }
                   console.log("new images in revolution: ", urlArray.length);
                   // 2. update the list
@@ -190,9 +192,9 @@
                 for (i = 0; i < revolution_sets.length; i++) {
                   console.log("revolution index: ", i);
                   var revolution = revolution_sets[i].Revolutions;
-                  var urlArray = revolution[0].WebImages;
+                  var urlArray = revolution[0].RawImages;
                   if(revolution.length > 1) {
-                    urlArray = revolution[1].WebImages;
+                    urlArray = revolution[1].RawImages;
                   }
 
                   var j;
@@ -237,9 +239,9 @@
                 for (i = 0; i < revolution_sets.length; i++) {
                   console.log("revolution index: ", i);
                   var revolution = revolution_sets[i].Revolutions;
-                  var urlArray = revolution[0].WebImages;
+                  var urlArray = revolution[0].RawImages;
                   if(revolution.length > 1) {
-                    urlArray = revolution[1].WebImages;
+                    urlArray = revolution[1].RawImages;
                   }
                   console.log("images in revolution: ", urlArray.length);
                   // 2. update the list
@@ -257,9 +259,9 @@
                 for (i = 0; i < revolution_sets.length; i++) {
                   console.log("revolution index: ", i);
                   var revolution = revolution_sets[i].Revolutions;
-                  var urlArray = revolution[0].WebImages;
+                  var urlArray = revolution[0].RawImages;
                   if(revolution.length > 1) {
-                    urlArray = revolution[1].WebImages;
+                    urlArray = revolution[1].RawImages;
                   }
 
                   var j;
@@ -282,6 +284,25 @@
 
             })
 
+          }
+
+          function getNewSets(preSets, currentSets) {
+            var newSets = [];
+            var preLength = preSets.length;
+            var curLength = currentSets.length;
+            var newLength = curLength - preLength;
+            if(newLength < 0){
+              return newSets;
+            }
+            var j;
+            for(j = preLength -1; j >= 0; j--) {
+              if(currentSets[curLength-1].Serial === preSets[j].Serial) {
+                break;
+              }
+            }
+            newLength += (preLength - j - 1);
+            newSets = currentSets.slice(0, newLength);
+            return newSets;
           }
 
       }
