@@ -32,8 +32,8 @@ void ImageViewerWidget::SetImage(const QPixmap &newImage)
     //int h = imageLabel->height();
     //::emprintf("ImageViewerWidget setImage, label width: %d, height: %d: ", w, h);
     // set a scaled pixmap to a w x h window keeping its aspect ratio
-    imageLabel->setPixmap(newImage.scaled(1620, 1080, Qt::KeepAspectRatio));
-    //imageLabel->setPixmap(newImage);
+    //imageLabel->setPixmap(newImage.scaled(1620, 1080, Qt::KeepAspectRatio));
+    imageLabel->setPixmap(newImage);
 
 }
 
@@ -69,7 +69,7 @@ void ImageViewerWidget::closeEvent(QCloseEvent *event){
 
 void ImageViewerWidget::UpdatePixmap(char *data, int size)
 {
-    pixmap.detach();
+
     if(!pixmap.loadFromData(QByteArray(data, size))){
         //Dsr::Logger::Info("Pixmap failed to load from data");
         pixmap.fill(QColor("yellow").rgba());
@@ -84,7 +84,7 @@ void ImageViewerWidget::UpdatePixmap(char *data, int size)
 
 void ImageViewerWidget::UpdatePixmapFromImage(QString img)
 {
-    pixmap.detach();
+
     if(!pixmap.load(img)){
         //Dsr::Logger::Info("Pixmap failed to load from data");
         pixmap.fill(QColor("yellow").rgba());
@@ -98,7 +98,7 @@ void ImageViewerWidget::UpdatePixmapFromImage(QString img)
 }
 
 void ImageViewerWidget::UpdatePixmapFromImage(QByteArray data){
-    pixmap.detach();
+
     if(!pixmap.loadFromData(data)){
         pixmap.fill(QColor("yellow").rgba());
     }

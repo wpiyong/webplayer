@@ -1,6 +1,8 @@
 #include "dsrplayercontroller.h"
 #include <QTimer>
 #include <QDebug>
+#include <QPixmap>
+#include <QBuffer>
 #include "../lib/emprintf.h"
 
 #include "../lib/tasks/revolutiondownloadtask.h"
@@ -78,49 +80,34 @@ void DsrPlayerController::UpdateImageViewer(){
 
         ::emprintf("UpdateImageViewer with revosReady == true, DownloadImage with url: %d", imgSize[imgTotalIndex]);
         if(pair.second.size() == 0) {
-            //downloadMgr->downloadFile(pair.first, "1");
-            //char* data = &(*imgData[0]);
-            //int size = imgSize[0];
-            //size_t sizeOut[1];
-            //unsigned char* rawData = base64_decode(data, size, sizeOut);
+
             if(imgSize[imgTotalIndex] <= 0) {
                 if(downloadIndex != imgTotalIndex) {
                     fetch(imgUrls[imgTotalIndex], imgTotalIndex);
                     downloadIndex = imgTotalIndex;
                 }
-            }
-            QByteArray ba(imgData[imgTotalIndex], imgSize[imgTotalIndex]);
-            ::emprintf("UpdateImageViewer with data from js, raw data length: %d", imgSize[imgTotalIndex]);
-            imgsVec[imgTotalIndex].second = ba;
+            } else {
+                QByteArray ba(imgData[imgTotalIndex], imgSize[imgTotalIndex]);
+                ::emprintf("UpdateImageViewer with data from js, raw data length: %d", imgSize[imgTotalIndex]);
+                QPixmap pix;
+                pix.loadFromData(ba);
 
-            if(imgSize[imgTotalIndex] > 0) {
-                if(pair.second.size() == 0){
-                    QByteArray ba(imgData[imgTotalIndex], imgSize[imgTotalIndex]);
-                    imgsVec[imgTotalIndex].second = ba;
-                }
-                emit UpdatePixmapFromImage(ba);
+                QPixmap scaledPix = pix.scaled(1620, 1080, Qt::KeepAspectRatio);
+                QByteArray bArray;
+                QBuffer buffer(&bArray);
+                buffer.open(QIODevice::WriteOnly);
+                scaledPix.save(&buffer, "JPG");
+
+                imgsVec[imgTotalIndex].second = bArray;
+
+                emit UpdatePixmapFromImage(bArray);
                 if( revoIndex % 2 == 0 ) {
                     imgIndex++;
                 } else {
                     imgIndex--;
                 }
             }
-//            QByteArray ba = pair.first.toLatin1();
-//            const char *str = ba.data();
-//            ::emprintf("UpdateImageViewer with revosReady == true, DownloadImage with url: %s", str);
 
-//            QNetworkRequest request(pair.first);
-//            QNetworkReply* reply = nullptr;
-//            reply = networkMgr->get(request);
-
-//            while(reply == nullptr) {
-//                ;
-//            }
-//            downloadFinished(reply);
-
-            //apiService->DownloadImage(pair.first);
-            //imgsVec[0].second = data;
-            //emit UpdatePixmapFromImage(data);
         } else {
             ::emprintf("UpdateImageViewer with revosReady == true, QByteArray size > 0");
             ::emprintf("UpdateImageViewer with revosReady == true, QByteArray size: %d", pair.second.size());
