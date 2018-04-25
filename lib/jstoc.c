@@ -53,12 +53,17 @@ EMSCRIPTEN_KEEPALIVE void createImgUrlArray(int imgs) {
 EMSCRIPTEN_KEEPALIVE void setImgUrl(char* url, int index, int length) {
     if(imgUrls) {
         imgUrls[index] = malloc((length + 1) * sizeof(char));
-        strcpy(imgUrls[index], url);
+        //strcpy(imgUrls[index], url);
+        memcpy(imgUrls[index], url, length);
+        imgUrls[index][length] = '\0';
     }
 }
 
 EMSCRIPTEN_KEEPALIVE void setImgData(char* data, int index, int length) {
     if(imgData) {
+        if(imgData[index]){
+            free(imgData[index]);
+        }
         imgData[index] = malloc((length + 1) * sizeof(char));
         memcpy(imgData[index], data, length);
         imgData[index][length] = '\0';
@@ -100,7 +105,9 @@ EMSCRIPTEN_KEEPALIVE void createImgUrlArrayNew(int imgs) {
 EMSCRIPTEN_KEEPALIVE void setImgUrlNew(char* url, int index, int length) {
     if(imgUrlsNew) {
         imgUrlsNew[index] = malloc((length + 1) * sizeof(char));
-        strcpy(imgUrlsNew[index], url);
+        //strcpy(imgUrlsNew[index], url);
+        memcpy(imgUrlsNew[index], url, length);
+        imgUrlsNew[index][length] = '\0';
         imgUrlSizeNew[index] = length;
     }
 }
@@ -108,6 +115,9 @@ EMSCRIPTEN_KEEPALIVE void setImgUrlNew(char* url, int index, int length) {
 // this function is replace by emscripten fetch function
 EMSCRIPTEN_KEEPALIVE void setImgDataNew(char* data, int index, int length) {
     if(imgDataNew) {
+        if(imgDataNew[index]){
+            free(imgDataNew[index]);
+        }
         imgDataNew[index] = malloc((length + 1) * sizeof(char));
         memcpy(imgDataNew[index], data, length);
         imgDataNew[index][length] = '\0';

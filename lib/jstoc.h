@@ -19,7 +19,7 @@ int listSizeNew = 0;
 int* imgUrlSizeNew;
 
 int imgFinished = 0;
-int downloadIndex = 0;
+int downloadIndex = -1;
 int newRevolutionSets = 0;
 
 #ifdef __cplusplus

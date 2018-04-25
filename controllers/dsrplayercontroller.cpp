@@ -75,9 +75,8 @@ void DsrPlayerController::UpdateImageViewer(){
         imgTotalIndex = calculateImgTotalIndex(imgIndex, revoIndex);
         ::emprintf("UpdateImageViewer image index: %d", imgTotalIndex);
         QPair<QString, QByteArray> pair = imgsVec.at(imgTotalIndex);
-        QByteArray second = pair.second;
-        const char *strSecond = second.data();
-        ::emprintf("UpdateImageViewer with revosReady == true, DownloadImage with url: %s", imgData[imgTotalIndex]);
+
+        ::emprintf("UpdateImageViewer with revosReady == true, DownloadImage with url: %d", imgSize[imgTotalIndex]);
         if(pair.second.size() == 0) {
             //downloadMgr->downloadFile(pair.first, "1");
             //char* data = &(*imgData[0]);
@@ -85,14 +84,20 @@ void DsrPlayerController::UpdateImageViewer(){
             //size_t sizeOut[1];
             //unsigned char* rawData = base64_decode(data, size, sizeOut);
             if(imgSize[imgTotalIndex] <= 0) {
-                fetch(imgUrls[imgTotalIndex], imgTotalIndex);
-                downloadIndex = imgTotalIndex;
+                if(downloadIndex != imgTotalIndex) {
+                    fetch(imgUrls[imgTotalIndex], imgTotalIndex);
+                    downloadIndex = imgTotalIndex;
+                }
             }
             QByteArray ba(imgData[imgTotalIndex], imgSize[imgTotalIndex]);
             ::emprintf("UpdateImageViewer with data from js, raw data length: %d", imgSize[imgTotalIndex]);
             imgsVec[imgTotalIndex].second = ba;
 
             if(imgSize[imgTotalIndex] > 0) {
+                if(pair.second.size() == 0){
+                    QByteArray ba(imgData[imgTotalIndex], imgSize[imgTotalIndex]);
+                    imgsVec[imgTotalIndex].second = ba;
+                }
                 emit UpdatePixmapFromImage(ba);
                 if( revoIndex % 2 == 0 ) {
                     imgIndex++;
@@ -183,15 +188,15 @@ void DsrPlayerController::UpdateImageViewer(){
 //    }
 //    ::emprintf("before: %d", size);
 
-    size = getData(0);
-    if(size > 6) {
-        size = 6;
-    } else {
-        if(size < 0) {
-            size = 0;
-        }
-    }
-    ::emprintf("after: %d", size);
+//    size = getData(0);
+//    if(size > 6) {
+//        size = 6;
+//    } else {
+//        if(size < 0) {
+//            size = 0;
+//        }
+//    }
+//    ::emprintf("after: %d", size);
 
     if(imgTotal > 0 && listSize > 0 && !revosReady){
 
@@ -204,6 +209,10 @@ void DsrPlayerController::UpdateImageViewer(){
 
 void DsrPlayerController::prepareRevolutionMap() {
     // clean map and vector
+    for(int i = 0; i < imgsVec.size(); i++){
+        imgsVec[i].second.clear();
+        imgsVec[i].first.clear();
+    }
     imgsMap.clear();
     revosVec.clear();
     imgsVec.clear();
