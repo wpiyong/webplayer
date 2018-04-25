@@ -100,7 +100,7 @@ void DsrPlayerController::UpdateImageViewer(){
 
                 imgsVec[imgTotalIndex].second = bArray;
 
-                emit UpdatePixmapFromImage(bArray);
+                emit UpdatePixmapFromImage(imgsVec.at(imgTotalIndex).second);
                 if( revoIndex % 2 == 0 ) {
                     imgIndex++;
                 } else {
