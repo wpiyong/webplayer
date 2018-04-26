@@ -19,9 +19,10 @@ private:
     ImageViewerWidget* imageViewerWidget;
     ApiServices* apiService;
     QVector<RevolutionSet*> rSet;
-    QMap<QString, QByteArray> imgsMap;
     QVector<QPair<QString, QByteArray>> imgsVec;
     QVector<int> revosVec;
+    QVector<QPair<QString, QByteArray>> imgsVecOld;
+    QVector<int> revosVecOld;
 
     int imgIndex;
     int revoIndex;
@@ -35,6 +36,7 @@ private:
 
     void imageViewerControl(Revolution* rev);
     void prepareRevolutionMap();
+    void prepareRevolutionOld();
     int calculateImgTotalIndex(int aImgIndex, int aRevoIndex);
 public:
     DsrPlayerController(ImageViewerWidget* aImageViewerWidget, QObject *parent = nullptr);

@@ -24,6 +24,7 @@ extern "C" int* imgSize;
 extern "C" int imgFinished;
 extern "C" int downloadIndex;
 extern "C" int newRevolutionSets;
+extern "C" int totalRevolutionSets;
 
 using namespace Dsr;
 
@@ -70,6 +71,7 @@ void DsrPlayerController::UpdateImageViewer(){
         // check new revolution
         if(imgIndex == 0 && newRevolutionSets > 0) {
             ::emprintf("UpdateImageViewer prepareNewRevolutionSets");
+            prepareRevolutionOld();
             prepareNewRevolutionSets();
             prepareRevolutionMap();
         }
@@ -194,13 +196,33 @@ void DsrPlayerController::UpdateImageViewer(){
     }
 }
 
+void DsrPlayerController::prepareRevolutionOld() {
+    // clean map and vector
+    for(int i = 0; i < imgsVecOld.size(); i++){
+        imgsVecOld[i].second.clear();
+        imgsVecOld[i].first.clear();
+    }
+    revosVecOld.clear();
+    imgsVecOld.clear();
+    int left = totalRevolutionSets - listSize;
+    ::emprintf("prepareRevolutionOld revolutions: %d", left);
+    int imgCount = 0;
+    for(int i = 0; i < left; i++) {
+        revosVecOld.push_back(revosVec[i]);
+        imgCount += revosVec[i];
+    }
+    ::emprintf("prepareRevolutionOld images: %d", imgCount);
+    for(int i = 0; i < imgCount; i++) {
+        imgsVecOld.push_back(imgsVec[i]);
+    }
+}
+
 void DsrPlayerController::prepareRevolutionMap() {
     // clean map and vector
     for(int i = 0; i < imgsVec.size(); i++){
         imgsVec[i].second.clear();
         imgsVec[i].first.clear();
     }
-    imgsMap.clear();
     revosVec.clear();
     imgsVec.clear();
 
@@ -209,9 +231,17 @@ void DsrPlayerController::prepareRevolutionMap() {
         revosVec.push_back(list[i]);
     }
 
+    for(int i = 0; i < revosVecOld.size(); i++) {
+        revosVec.push_back((revosVecOld[i]));
+    }
+
     for(int i = 0; i < imgTotal; i++) {
         QByteArray data;
         imgsVec.push_back(qMakePair(imgUrls[i], data));
+    }
+
+    for(int i = 0; i < imgsVecOld.size(); i++) {
+        imgsVec.push_back((imgsVecOld[i]));
     }
 
     revosReady = true;

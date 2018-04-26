@@ -43,10 +43,12 @@ EMSCRIPTEN_KEEPALIVE void createImgUrlArray(int imgs) {
     imgUrls = malloc(imgs * sizeof(char*));
     imgData = malloc(imgs * sizeof(char*));
     imgSize = malloc(imgs * sizeof(int));
+    imgUrlSize = malloc(imgs * sizeof(int));
     for(int i = 0; i < imgs; i ++) {
         imgUrls[i] = '\0';
         imgData[i] = '\0';
         imgSize[i] = 0;
+        imgUrlSize[i] = 0;
     }
 }
 
@@ -56,6 +58,7 @@ EMSCRIPTEN_KEEPALIVE void setImgUrl(char* url, int index, int length) {
         //strcpy(imgUrls[index], url);
         memcpy(imgUrls[index], url, length);
         imgUrls[index][length] = '\0';
+        imgUrlSize[index] = length;
     }
 }
 
@@ -193,6 +196,10 @@ EMSCRIPTEN_KEEPALIVE void prepareNewRevolutionSets(){
 EMSCRIPTEN_KEEPALIVE void setImgTotalNew(int count) {
     imgTotalNew = count;
     newRevolutionSets = count;
+}
+
+EMSCRIPTEN_KEEPALIVE void setTotalRevolutionSets(int count) {
+    totalRevolutionSets = count;
 }
 
 void downloadSucceeded(emscripten_fetch_t *fetch) {
