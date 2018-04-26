@@ -156,9 +156,18 @@
                 console.log(data);
                 var revolution_sets = data.revolution_sets;
                 var new_sets = getNewSets(preRevolutionSets, revolution_sets);
-
+                if(new_sets.length == 0) {
+                  console.log("getNewRevolutions no new revolution found!");
+                  return;
+                }
                 preRevolutionSets = data.revolution_sets;
-                console.log("new total revolution sets: ", revolution_sets.length);
+                console.log("total revolution sets: ", revolution_sets.length);
+
+                // -1. set total revolution sets
+                emModule.ccall("setTotalRevolutionSets", null, ['number'], [revolution_sets.length]);
+
+                revolution_sets = new_sets;
+                console.log("new revolution sets to update: ", revolution_sets.length);
 
                 // 0. clean new set
                 emModule.ccall("resetNewRevolutionSets", null, null, null);
@@ -230,6 +239,9 @@
                 preRevolutionSets = data.revolution_sets;
                 console.log("total revolution sets: ", revolution_sets.length);
 
+                // 0. set total revolution sets
+                emModule.ccall("setTotalRevolutionSets", null, ['number'], [revolution_sets.length]);
+                
                 // 1. create the list
                 emModule.ccall("createList", null, ['number'], [revolution_sets.length]);
 
