@@ -6,7 +6,6 @@
 #include "emprintf.h"
 #include "jstoc.h"
 
-
 #ifdef __cplusplus
 extern "C" {
 #endif

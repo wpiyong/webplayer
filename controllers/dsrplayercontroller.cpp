@@ -25,6 +25,7 @@ extern "C" int imgFinished;
 extern "C" int downloadIndex;
 extern "C" int newRevolutionSets;
 extern "C" int totalRevolutionSets;
+extern "C" int listSizeNew;
 
 using namespace Dsr;
 
@@ -204,7 +205,7 @@ void DsrPlayerController::prepareRevolutionOld() {
     }
     revosVecOld.clear();
     imgsVecOld.clear();
-    int left = totalRevolutionSets - listSize;
+    int left = totalRevolutionSets - listSizeNew;
     ::emprintf("prepareRevolutionOld revolutions: %d", left);
     int imgCount = 0;
     for(int i = 0; i < left; i++) {
